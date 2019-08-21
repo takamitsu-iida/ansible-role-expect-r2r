@@ -120,6 +120,10 @@ expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
   exit 2
 }
 
+#
+# Cisco機器限定の処理
+#
+
 # enableコマンドで特権モードに遷移
 send -- "enable\r"
 expect -re "\[Pp\]assword:" {
@@ -128,10 +132,7 @@ expect -re "\[Pp\]assword:" {
 } ${INITIAL_PROMPT} {
 }
 
-#
-# Cisco機器限定
 # terminal length 0 を実行してMOREを抑制
-#
 send -- "terminal length 0\r"
 expect -re "${INITIAL_PROMPT}"
 

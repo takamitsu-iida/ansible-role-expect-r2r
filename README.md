@@ -227,7 +227,7 @@ PLAY RECAP *********************************************************************
 r1                         : ok=6    changed=2    unreachable=0    failed=0
 r2                         : ok=6    changed=2    unreachable=0    failed=0
 
-iida-macbook-pro:ansible-role-expect-r2r iida$
+iida$
 ```
 
 License
@@ -371,6 +371,11 @@ expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
   exit 2
 }
 
+#
+# Cisco機器限定
+# terminal length 0 を実行してMOREを抑制
+#
+
 # enableコマンドで特権モードに遷移
 send -- "enable\r"
 expect -re "\[Pp\]assword:" {
@@ -379,10 +384,7 @@ expect -re "\[Pp\]assword:" {
 } ${INITIAL_PROMPT} {
 }
 
-#
-# Cisco機器限定
-# terminal length 0 を実行してMOREを抑制
-#
+# terminal length 0でMOREを抑止
 send -- "terminal length 0\r"
 expect -re "${INITIAL_PROMPT}"
 
