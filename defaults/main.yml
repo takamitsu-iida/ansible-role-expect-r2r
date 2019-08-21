@@ -1,0 +1,17 @@
+---
+
+# expectスクリプトファイル
+EXPECT_SCRIPT_PATH: "{{ role_path + '/files/r2r.expect' }}"
+
+# NTCテンプレートファイル
+NTC_PATH: "{{ role_path + '/files/cisco_ios_show_interfaces.template' }}"
+
+# ログをファイルに保存するか
+CREATE_LOG: true
+
+# ログファイルの先頭につける文字列
+PREFIX: ''
+
+# ログを残すフォルダ
+# LOG_PATH: "{{ role_path + '/log' }}"
+LOG_PATH: "{{ lookup('env', 'PWD') + '/log' }}"

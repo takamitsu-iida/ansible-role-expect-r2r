@@ -1,0 +1,72 @@
+---
+
+- name: create log directory if not exists
+  delegate_to: localhost
+  file:
+    path: "{{ LOG_PATH | default('./log') }}"
+    state: directory
+    recurse: yes
+  when: CREATE_LOG
+
+- name: get current time
+  set_fact:
+    date: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S') }}"
+
+-
+  block:
+    - name: run expect script on localhost
+      delegate_to: localhost
+      command: "{{ EXPECT_SCRIPT_PATH + ' ' + JUMP_HOST + ' ' + JUMP_USERNAME + ' ' + JUMP_PASSWORD + ' ' + JUMP_ENABLE + ' ' + ansible_host + ' ' + ansible_user + ' ' + ansible_password + ' ' + ansible_become_pass + ' ' + CMD|join(' ') }}"
+      register: result
+      vars:
+        - CMD:
+          - 'show\ interfaces'
+          # - 'show\ hard'
+
+  rescue:
+    - name: log failed result
+      delegate_to: localhost
+      copy:
+        content: "{{ result | to_nice_json(indent=2) }}"
+        dest: "{{ LOG_PATH + '/' + '_FAILED_' + filename }}"
+      vars:
+        - ext: '.txt'
+        - filename: "{{ PREFIX | default('') + inventory_hostname + '_' + role_name | basename + '_' + date + ext }}"
+      when:
+        - CREATE_LOG
+    - fail:
+        msg: "Failed to execute command on remote device {{ inventory_hostname }}"
+
+# - name: display
+#   debug:
+#     msg: "{{ result.stdout }}"
+
+- name: save result to file
+  delegate_to: localhost
+  copy:
+    content: "{{ result.stdout }}"
+    dest: "{{ LOG_PATH + '/' + filename }}"
+  vars:
+    - filename: "{{ PREFIX | default('') + inventory_hostname + '_' + role_name | basename + '_' + date + '.txt' }}"
+  ignore_errors: true
+  when:
+    - CREATE_LOG
+
+- name: parse by ntc-templates
+  set_fact:
+    parsed_list: "{{ result.stdout | parse_cli_textfsm(NTC_PATH) }}"
+
+# 加工結果を表示
+# - name: debug formatted text
+#   debug:
+#     var: parsed_list
+
+- name: display interface speed and mtu
+  debug:
+    msg: |
+      {% for item in parsed_list %}
+      interface = {{ item.INTERFACE | default('') }}
+        speed = {{ item.SPEED | default('') }}
+        mtu = {{ item.MTU | default('') }}
+
+      {% endfor %}

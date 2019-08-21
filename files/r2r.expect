@@ -1,0 +1,189 @@
+#!/usr/bin/expect -f
+#!/usr/local/bin/expect -f
+
+#
+# ルータを踏み台にして、別のルータに乗り込むためのexpectスクリプトです。
+# 2019/08/20
+# takamitsu-iida
+#
+
+# 実行例
+# $ ./r2r.expect 10.35.185.2 cisco cisco cisco 172.20.0.21 cisco cisco cisco "show ip route" "show process cpu | i CPU"
+
+if {$argc < 8} {
+  puts "Usage: $argv0 jump_host jump_user jump_pass jump_enable target_host target_user target_pass target_enable command command ..."
+  exit
+}
+
+# 引数から情報を取得
+#   第1引数： 踏み台のホスト名(IPアドレス)
+#   第2引数： 踏み台のユーザ名
+#   第3引数： 踏み台のパスワード
+#   第4引数： 踏み台の管理者パスワード
+#   第5引数： ターゲット装置のホスト名(IPアドレス)
+#   第6引数： ターゲット装置のユーザ名
+#   第7引数： ターゲット装置のパスワード
+#   第8引数： ターゲット装置の管理者パスワード
+#   第9引数以降はターゲット装置で実行したいコマンドです。
+
+set JUMP_HOST [lindex $argv 0]
+set JUMP_USERNAME [lindex $argv 1]
+set JUMP_PASSWORD [lindex $argv 2]
+set JUMP_ENABLE [lindex $argv 3]
+
+set REMOTE_HOST [lindex $argv 4]
+set REMOTE_USERNAME [lindex $argv 5]
+set REMOTE_PASSWORD [lindex $argv 6]
+set REMOTE_ENABLE [lindex $argv 7]
+
+# 20秒間応答がなければ終了
+set timeout 20
+
+# プロンプト(正規表現)
+set INITIAL_PROMPT "\[#$>\]"
+
+# 画面表示を停止(0で停止、1で再開)
+log_user 0
+
+# telnetを起動
+spawn telnet ${JUMP_HOST}
+
+# Username: または Login: が返ってきたら
+expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
+
+  # ユーザ名を送信して、
+  send -- "${JUMP_USERNAME}\r"
+
+    # Password: が戻ってきたら
+    expect -re "\[Pp\]assword:" {
+
+      # パスワードを送信
+      send -- "${JUMP_PASSWORD}\r"
+      expect -re ${INITIAL_PROMPT}
+
+    # プロンプトが返ってきたら、パスワードなしでログインできた
+    } ${INITIAL_PROMPT} {
+      # ログイン完了
+    }
+
+# Password: が返ってきたらパスワードを送信
+} "\[Pp\]assword:" {
+
+  send -- "${JUMP_PASSWORD}\r"
+  expect -re "${INITIAL_PROMPT}"
+  # ログイン完了
+
+# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできた
+} ${INITIAL_PROMPT} {
+  # ログイン完了
+} default {
+  exit 2
+} timeout {
+  exit 2
+}
+
+# 次のルータに接続
+
+send -- "telnet ${REMOTE_HOST}\r"
+
+# Username: または Login: が返ってきたら
+expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
+
+  # ユーザ名を送信して、
+  send -- "${REMOTE_USERNAME}\r"
+
+    # Password: が戻ってきたら
+    expect -re "\[Pp\]assword:" {
+
+      # パスワードを送信
+      send -- "${REMOTE_PASSWORD}\r"
+      expect -re ${INITIAL_PROMPT}
+
+    # プロンプトが返ってきたら、パスワードなしでログインできた
+    } ${INITIAL_PROMPT} {
+      # ログイン完了
+    }
+
+# Password: が返ってきたらパスワードを送信
+} "\[Pp\]assword:" {
+
+  send -- "${REMOTE_PASSWORD}\r"
+  expect -re "${INITIAL_PROMPT}"
+  # ログイン完了
+
+# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできた
+} ${INITIAL_PROMPT} {
+  # ログイン完了
+} default {
+  exit 2
+} timeout {
+  exit 2
+}
+
+# enableコマンドで特権モードに遷移
+send -- "enable\r"
+expect -re "\[Pp\]assword:" {
+  send -- "${REMOTE_ENABLE}\r"
+  expect -re "${INITIAL_PROMPT}"
+} ${INITIAL_PROMPT} {
+}
+
+#
+# Cisco機器限定
+# terminal length 0 を実行してMOREを抑制
+#
+send -- "terminal length 0\r"
+expect -re "${INITIAL_PROMPT}"
+
+#
+# ここから指定されたコマンドを実行
+#
+
+# 画面表示を開始
+log_user 1
+
+send -- "\r"
+expect -re "${INITIAL_PROMPT}"
+
+set CURRENT_PROMPT $expect_out(buffer)
+set CURRENT_PROMPT [string map {"\r" ""} $CURRENT_PROMPT]
+set CURRENT_PROMPT [string map {"\n" ""} $CURRENT_PROMPT]
+
+# プロンプトが何に設定されたのか確認するための画面表示
+# puts "${CURRENT_PROMPT}"
+
+# コマンドを実行する
+# 引数の先頭8個は接続に必要な情報で、実行したいコマンドはその後ろにある
+set i 8
+while { [lindex $argv $i ] != "" } {
+  # 引数からコマンドを取り出す
+  set CMD [lindex $argv $i ]
+
+  # コマンドを打ち込む
+  send -- "${CMD}\r"
+  expect -re ${CURRENT_PROMPT}
+  incr i
+
+  # command output is in $expect_out(1,string)
+  # expectでログファイルに残すなら、ここで。
+
+  send -- "\r"
+  expect -re ${CURRENT_PROMPT}
+
+}
+
+send -- "\r"
+expect -re "${CURRENT_PROMPT}"
+
+# 画面表示を停止
+log_user 0
+
+# ログアウト
+send -- "exit\r"
+expect -re "${INITIAL_PROMPT}"
+
+# 踏み台からログアウト
+send -- "exit\r"
+
+# 終了
+expect eof

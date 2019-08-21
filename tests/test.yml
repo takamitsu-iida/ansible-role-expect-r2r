@@ -1,0 +1,28 @@
+---
+
+#
+# expectを使ってコマンドを投入します。
+#
+# 2019/08/20
+#
+# Takamitsu IIDA (@takamitsu-iida)
+
+- name: GATHER SHOW COMMANDS OUTPUT
+  hosts: "{{ TARGET_HOSTS | default('') }}"  # see vars.yml
+  vars_files: vars.yml
+  gather_facts: false
+  # serial: 0 の場合は対象装置すべてを一度に取り出して実行し、forkの数だけパラレル実行する
+  # 検証環境で同じ装置に対して複数の名前を付けている場合には同時接続が発生しないようにserialを1にすること
+  serial: "{{ SERIAL | default(0) }}"
+
+  tasks:
+
+    - name: FAIL SCRIPT IF REQUIRED TARGET_HOSTS PARAMETER IS MISSING
+      fail:
+        msg: "You have to add the 'TARGET_HOSTS:' in vars.yml"
+      when:
+        - (TARGET_HOSTS is not defined) or (TARGET_HOSTS == '')
+      run_once: true
+
+    - import_role:
+        name: ansible-role-expect-r2r

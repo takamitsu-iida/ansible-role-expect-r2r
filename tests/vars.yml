@@ -1,0 +1,23 @@
+---
+
+# 同時実行数
+# 検証環境では同じ装置に同時ログインしないように1にすること
+# 本番環境ではデフォルトの0
+# SERIAL: 1
+SERIAL: "{% if ansible_inventory_sources[0]|basename == 'development' %}1{% else %}0{% endif %}"
+
+# ログ置き場のサブディレクトリ指定
+# LOG_SUBDIR: >-
+#   {{
+#     '/' + hostvars[inventory_hostname].area +
+#     '/' + (hostvars[inventory_hostname].parent|string).zfill(2) + '.' + hostvars[inventory_hostname].site_detail
+#   }}
+
+TARGET_HOSTS: r1, r2
+
+# expectで踏み台にする装置の情報
+JUMP_HOST: 10.35.185.2
+JUMP_USERNAME: cisco
+JUMP_PASSWORD: cisco
+JUMP_ENABLE: cisco
+
