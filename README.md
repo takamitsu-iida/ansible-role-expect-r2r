@@ -111,6 +111,12 @@ tests/test.ymlがプレイブックです。
 
 tests/vars.ymlに踏み台に関する情報を記述します。
 
+このロールでは、Ciscoルータを踏み台にして別のCiscoルータに接続し、show interfacesを実行します。
+そのコマンド出力をNTCテンプレートで処理した結果を表示します。
+
+- 10.35.185.2を踏み台にして、r1に接続して、show interfacesを実行します。
+- 10.35.185.2を踏み台にして、r2に接続して、show interfacesを実行します。
+
 実行例。
 
 ```bash
@@ -213,7 +219,6 @@ r1                         : ok=6    changed=2    unreachable=0    failed=0
 r2                         : ok=6    changed=2    unreachable=0    failed=0
 
 iida-macbook-pro:ansible-role-expect-r2r iida$
-
 ```
 
 License
