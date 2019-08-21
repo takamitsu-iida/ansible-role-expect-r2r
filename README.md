@@ -129,7 +129,7 @@ tests/vars.ymlに踏み台に関する情報を記述します。
 実行例。
 
 ```bash
-iida-macbook-pro:ansible-role-expect-r2r iida$ ansible-playbook tests/test.yml
+iida$ ansible-playbook tests/test.yml
 
 PLAY [GATHER SHOW COMMANDS OUTPUT] ***************************************************************************
 
