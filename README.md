@@ -258,7 +258,7 @@ Cisco以外の装置の場合は適宜書き換えてご利用ください。
 #
 
 # 実行例
-# $ ./r2r.expect 10.35.185.2 cisco cisco cisco 172.20.0.21 cisco cisco cisco "show ip route" "show process cpu | i CPU"
+# $ ./r2r.expect 10.35.185.2 cisco cisco123 cisco123 172.20.0.21 cisco cisco123 cisco123 "show ip route" "show process cpu | i CPU"
 
 if {$argc < 8} {
   puts "Usage: $argv0 jump_host jump_user jump_pass jump_enable target_host target_user target_pass target_enable command command ..."
