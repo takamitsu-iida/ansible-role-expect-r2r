@@ -245,7 +245,7 @@ Author Information
 
 expectスクリプトの全文は以下のようになっています。
 
-装置はCiscoルータを前提に書いたものですので、terminal length 0を打ち込んでいます。
+装置はCiscoルータを前提に書いたものですので、enableやterminal length 0を打ち込んでいます。
 Cisco以外の装置の場合は適宜書き換えてご利用ください。
 
 ```tcl
