@@ -18,6 +18,6 @@ TARGET_HOSTS: r1, r2
 # expectで踏み台にする装置の情報
 JUMP_HOST: 10.35.185.2
 JUMP_USERNAME: cisco
-JUMP_PASSWORD: cisco
-JUMP_ENABLE: cisco
+JUMP_PASSWORD: cisco123
+JUMP_ENABLE: cisco123
 
