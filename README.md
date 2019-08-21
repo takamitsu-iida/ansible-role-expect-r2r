@@ -28,7 +28,15 @@ expectスクリプトが正常に動作することを確認してください�
 expectスクリプトには実行権限が必要です。
 
 ```bash
-r2r.expect 踏み台のIP 踏み台の接続ユーザ名 踏み台のパスワード 踏み台の管理者パスワード IP 接続ユーザ名 パスワード 'コマンド'
+r2r.expect \
+  踏み台のIP \
+  踏み台の接続ユーザ名 \
+  踏み台のパスワード \
+  踏み台の管理者パスワード\
+  ターゲットのIP \
+  ターゲットの接続ユーザ名 \
+  ターゲットのパスワード \
+  '実行したいコマンド'
 ```
 
 実行例。
@@ -38,7 +46,7 @@ r2r.expect 踏み台のIP 踏み台の接続ユーザ名 踏み台のパスワ�
 接続関連の処理は画面に表示されません。showコマンドの結果だけが表示されます。
 
 ```bash
-iida-macbook-pro:ansible-role-expect-r2r iida$ ./files/r2r.expect 10.35.185.2 cisco cisco cisco 172.20.0.21 cisco cisco cisco 'show version'
+iida$ ./files/r2r.expect 10.35.185.2 cisco cisco123 cisco123 172.20.0.21 cisco cisco123 cisco123 'show version'
 
 r1#show version
 Cisco IOS XE Software, Version 16.03.05
