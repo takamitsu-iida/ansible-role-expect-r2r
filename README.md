@@ -372,8 +372,7 @@ expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
 }
 
 #
-# Cisco機器限定
-# terminal length 0 を実行してMOREを抑制
+# Cisco機器を前提とした処理
 #
 
 # enableコマンドで特権モードに遷移
@@ -431,11 +430,17 @@ expect -re "${CURRENT_PROMPT}"
 # 画面表示を停止
 log_user 0
 
-# ログアウト
+#
+# ログアウト処理
+# Cisco機器が前提なので、exitコマンドで切断する。
+#
 send -- "exit\r"
 expect -re "${INITIAL_PROMPT}"
 
+#
 # 踏み台からログアウト
+# Cisco機器が前提なので、exitコマンドで切断する。
+#
 send -- "exit\r"
 
 # 終了
