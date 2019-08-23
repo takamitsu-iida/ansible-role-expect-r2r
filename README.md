@@ -1,28 +1,19 @@
 expect-r2r
 =========
 
-expectスクリプトを使ってネットワーク機器から情報を収集するロールです。
+expectスクリプトを使ってネットワーク機器から情報を収集するansibleロールです。
 
 ネットワークの構成によっては装置に直接接続することはできず、ホップバイホップで接続することを余儀なくされることもあります。
 そして往々にしてそのような環境に置かれている装置はtelnetでしか接続できなかったりしますね。
 
-そのような環境の装置からansible単独で情報を収集するのは困難です。
+そのような直接乗り込めない環境の装置からansible単独で情報を収集するのは困難です。
 
-装置への接続とコマンドの打ち込みはexpectのスクリプトで行い、スクリプトの起動と結果の処理だけをansibleで行ったほうが生産性は良さそうです。
+装置への接続とコマンドの打ち込みはexpectスクリプトで行い、スクリプトの起動と結果の処理をansibleで行ったほうが生産性は良さそうです。
 
 Requirements
 ------------
 
 ローカルホストにexpectがインストールされている必要があります。
-
-Role Variables
---------------
-
-- EXPECT_SCRIPT_PATH: expectスクリプトのパスです。デフォルトは'/files/r2r.expect'です。
-- NTC_PATH: Ciscoデバイスのshow interacesコマンド出力を加工するためのNTCテンプレートです。デフォルトは'files/cisco_ios_show_interfaces.template'です。
-
-Dependencies
-------------
 
 expectスクリプトが正常に動作することを確認してください。
 
@@ -40,7 +31,7 @@ r2r.expect \
   '実行したいコマンド'
 ```
 
-実行例。
+expectスクリプトの実行例です。。
 
 10.35.185.2のCiscoルータに一度ログインして、そのあと172.20.0.21のCiscoルータに乗り込んで、show versionを実行します。
 
@@ -110,23 +101,54 @@ Configuration register is 0x2102
 r1#
 r1#
 r1#
-iida-macbook-pro:ansible-role-expect-r2r iida$
+iida$
 ```
+
+Role Variables
+--------------
+
+ロール変数はdefaults/main.ymlに記載しています。
+
+- EXPECT_SCRIPT_PATH: expectスクリプトのパスです。デフォルトは'/files/r2r.expect'です。
+- NTC_PATH: Ciscoデバイスのshow interacesコマンド出力を加工するためのNTCテンプレートです。デフォルトは'files/cisco_ios_show_interfaces.template'です。
+
+Dependencies
+------------
+
+他のロールへの依存関係はありません。
 
 Example Playbook
 ----------------
 
-tests/test.ymlがプレイブックです。
-
-tests/vars.ymlに踏み台に関する情報を記述します。
-
 このロールでは、Ciscoルータを踏み台にして別のCiscoルータに接続し、show interfacesを実行します。
-そのコマンド出力をNTCテンプレートで処理した結果を表示します。
+その出力をNTCテンプレートで処理して、結果を表示します。
 
-- 10.35.185.2を踏み台にして、r1に接続して、show interfacesを実行します。
-- 10.35.185.2を踏み台にして、r2に接続して、show interfacesを実行します。
+tests/test.ymlがプレイブックです。vars.ymlから変数を読み込むようにしています。
 
-実行例。
+```yml
+- name: GATHER SHOW COMMANDS OUTPUT
+  hosts: r1, r2
+  vars_files: vars.yml
+  gather_facts: false
+  serial: 1
+
+  tasks:
+    - import_role:
+        name: ansible-role-expect-r2r
+```
+
+tests/vars.ymlには、ターゲット利用する踏み台に関する情報を記述します。
+ターゲット装置ごとに踏み台を変えないといけない場合は、インベントリのhost_varsに定義した方が良いでしょう。
+
+```yml
+# expectで踏み台にする装置の情報
+JUMP_HOST: 10.35.185.2
+JUMP_USERNAME: cisco
+JUMP_PASSWORD: cisco123
+JUMP_ENABLE: cisco123
+```
+
+プレイブックの実行例。
 
 ```bash
 iida$ ansible-playbook tests/test.yml
@@ -245,7 +267,7 @@ Author Information
 
 expectスクリプトの全文は以下のようになっています。
 
-装置はCiscoルータを前提に書いたものですので、enableやterminal length 0を打ち込んでいます。
+Ciscoルータを前提に書いたものですので、enableやterminal length 0を打ち込んでいます。
 Cisco以外の装置の場合は適宜書き換えてご利用ください。
 
 ```tcl
