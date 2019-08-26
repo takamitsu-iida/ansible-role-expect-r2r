@@ -147,15 +147,14 @@ expect -re "${INITIAL_PROMPT}"
 # 画面表示を開始
 log_user 1
 
+# プロンプトを設定
 send -- "\r"
 expect -re "${INITIAL_PROMPT}"
-
-set CURRENT_PROMPT $expect_out(buffer)
-set CURRENT_PROMPT [string map {"\r" ""} $CURRENT_PROMPT]
-set CURRENT_PROMPT [string map {"\n" ""} $CURRENT_PROMPT]
+set CURRENT_PROMPT [string trim $expect_out(buffer)]
 
 # プロンプトが何に設定されたのか確認するための画面表示
 # puts "${CURRENT_PROMPT}"
+# exit 0
 
 # コマンドを実行する
 # 引数の先頭8個は接続に必要な情報で、実行したいコマンドはその後ろにある
