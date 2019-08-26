@@ -313,40 +313,43 @@ set REMOTE_ENABLE [lindex $argv 7]
 set timeout 20
 
 # プロンプト(正規表現)
+# motdを表示する装置の場合、いきなりこれにヒットしてしまうかもしれない
+# その場合はもっと厳密にプロンプトを定義しないといけない
 set INITIAL_PROMPT "\[#$>\]"
 
 # 画面表示を停止(0で停止、1で再開)
 log_user 0
 
-# telnetを起動
+# telnet または ssh を起動
 spawn telnet ${JUMP_HOST}
 
 # Username: または Login: が返ってきたら
 expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
 
-  # ユーザ名を送信して、
+  # ユーザ名を送信して
   send -- "${JUMP_USERNAME}\r"
 
-    # Password: が戻ってきたら
-    expect -re "\[Pp\]assword:" {
+  # Password: が戻ってきたら
+  expect -re "\[Pp\]assword:" {
 
-      # パスワードを送信
-      send -- "${JUMP_PASSWORD}\r"
-      expect -re ${INITIAL_PROMPT}
+    # パスワードを送信
+    send -- "${JUMP_PASSWORD}\r"
+    expect -re ${INITIAL_PROMPT}
 
-    # プロンプトが返ってきたら、パスワードなしでログインできた
-    } ${INITIAL_PROMPT} {
-      # ログイン完了
-    }
+  # プロンプトが返ってきたら、パスワードなしでログインできたということ
+  } ${INITIAL_PROMPT} {
+    # ログイン完了
+  }
 
-# Password: が返ってきたらパスワードを送信
+# Password: が返ってきたら
 } "\[Pp\]assword:" {
 
+  # パスワードを送信
   send -- "${JUMP_PASSWORD}\r"
   expect -re "${INITIAL_PROMPT}"
   # ログイン完了
 
-# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできた
+# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできたということ
 } ${INITIAL_PROMPT} {
   # ログイン完了
 } default {
@@ -362,29 +365,30 @@ send -- "telnet ${REMOTE_HOST}\r"
 # Username: または Login: が返ってきたら
 expect -re "\[Uu\]sername:|\[Ll\]ogin:" {
 
-  # ユーザ名を送信して、
+  # ユーザ名を送信して
   send -- "${REMOTE_USERNAME}\r"
 
-    # Password: が戻ってきたら
-    expect -re "\[Pp\]assword:" {
+  # Password: が戻ってきたら
+  expect -re "\[Pp\]assword:" {
 
-      # パスワードを送信
-      send -- "${REMOTE_PASSWORD}\r"
-      expect -re ${INITIAL_PROMPT}
+    # パスワードを送信
+    send -- "${REMOTE_PASSWORD}\r"
+    expect -re ${INITIAL_PROMPT}
 
-    # プロンプトが返ってきたら、パスワードなしでログインできた
-    } ${INITIAL_PROMPT} {
-      # ログイン完了
-    }
+  # プロンプトが返ってきたら、パスワードなしでログインできたということ
+  } ${INITIAL_PROMPT} {
+    # ログイン完了
+  }
 
-# Password: が返ってきたらパスワードを送信
+# Password: が返ってきたら
 } "\[Pp\]assword:" {
 
+  # パスワードを送信
   send -- "${REMOTE_PASSWORD}\r"
   expect -re "${INITIAL_PROMPT}"
   # ログイン完了
 
-# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできた
+# プロンプトが返ってきたら、ユーザ名もパスワードもなしにログインできたということ
 } ${INITIAL_PROMPT} {
   # ログイン完了
 } default {
@@ -405,7 +409,7 @@ expect -re "\[Pp\]assword:" {
 } ${INITIAL_PROMPT} {
 }
 
-# terminal length 0でMOREを抑止
+# terminal length 0 を実行してMOREを抑制
 send -- "terminal length 0\r"
 expect -re "${INITIAL_PROMPT}"
 
@@ -416,15 +420,14 @@ expect -re "${INITIAL_PROMPT}"
 # 画面表示を開始
 log_user 1
 
+# プロンプトを設定
 send -- "\r"
 expect -re "${INITIAL_PROMPT}"
-
-set CURRENT_PROMPT $expect_out(buffer)
-set CURRENT_PROMPT [string map {"\r" ""} $CURRENT_PROMPT]
-set CURRENT_PROMPT [string map {"\n" ""} $CURRENT_PROMPT]
+set CURRENT_PROMPT [string trim $expect_out(buffer)]
 
 # プロンプトが何に設定されたのか確認するための画面表示
 # puts "${CURRENT_PROMPT}"
+# exit 0
 
 # コマンドを実行する
 # 引数の先頭8個は接続に必要な情報で、実行したいコマンドはその後ろにある
