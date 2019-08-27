@@ -162,7 +162,7 @@ while { [lindex $argv $i ] != "" } {
 
   # コマンドを打ち込み、その応答だけを捕捉する
   send -- "${CMD}\r"
-  expect -re "\r\n(.*?)\r\n${CURRENT_PROMPT}"
+  expect -re "${CMD}\r\n?(.*?)\r\n?${CURRENT_PROMPT}"
 
   # 画面に表示
   puts "$expect_out(1,string)"
