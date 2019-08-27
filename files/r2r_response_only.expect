@@ -144,17 +144,14 @@ expect -re "${INITIAL_PROMPT}"
 # ここから指定されたコマンドを実行
 #
 
-# 画面表示を開始
-log_user 1
-
 # プロンプトを設定
 send -- "\r"
 expect -re "${INITIAL_PROMPT}"
 set CURRENT_PROMPT [string trim $expect_out(buffer)]
 
-# プロンプトが何に設定されたのか確認するための画面表示
-# puts "${CURRENT_PROMPT}"
-# exit 0
+## プロンプトが何に設定されたのか確認するための画面表示
+## puts "${CURRENT_PROMPT}"
+## exit 0
 
 # コマンドを実行する
 # 引数の先頭8個は接続に必要な情報で、実行したいコマンドはその後ろにある
@@ -163,18 +160,14 @@ while { [lindex $argv $i ] != "" } {
   # 引数からコマンドを取り出す
   set CMD [lindex $argv $i ]
 
-  # コマンドを打ち込む
+  # コマンドを打ち込み、その応答だけを捕捉する
   send -- "${CMD}\r"
-  expect -re ${CURRENT_PROMPT}
+  expect -re "\r\n(.*?)\r\n${CURRENT_PROMPT}"
+
+  # 画面に表示
+  puts "$expect_out(1,string)"
   incr i
-
-  # 見やすくするために空コマンドを入れる
-  # send -- "\r"
-  # expect -re ${CURRENT_PROMPT}
 }
-
-# 画面表示を停止
-log_user 0
 
 #
 # ログアウト処理
