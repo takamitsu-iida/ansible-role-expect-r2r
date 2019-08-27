@@ -312,7 +312,7 @@ set REMOTE_ENABLE [lindex $argv 7]
 # 20秒間応答がなければ終了
 set timeout 20
 
-# プロンプト(正規表現)
+# 接続時に期待するプロンプト(正規表現)
 # motdを表示する装置の場合、いきなりこれにヒットしてしまうかもしれない
 # その場合はもっと厳密にプロンプトを定義しないといけない
 set INITIAL_PROMPT "\[#$>\]"
@@ -448,9 +448,6 @@ while { [lindex $argv $i ] != "" } {
   expect -re ${CURRENT_PROMPT}
 
 }
-
-send -- "\r"
-expect -re "${CURRENT_PROMPT}"
 
 # 画面表示を停止
 log_user 0
